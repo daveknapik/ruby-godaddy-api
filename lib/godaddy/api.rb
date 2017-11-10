@@ -5,9 +5,8 @@ module Godaddy
   class APIError < StandardError; end
 
   class Api
-    API_URL = 'https://api.godaddy.com'
-
-    def initialize(apikey, apisecret)
+    def initialize(apikey, apisecret, environment = 'production')
+      @api_url = (environment == 'production') ? 'https://api.godaddy.com' : 'https://api.ote-godaddy.com'
       @headers = {
         'Authorization' => "sso-key #{apikey}:#{apisecret}",
         'Content-type' => 'application/json'
@@ -16,7 +15,7 @@ module Godaddy
 
     [:get, :post, :put, :patch, :delete].each do |method|
       define_method method do |uri, payload = nil|
-        uri = URI(API_URL + uri)
+        uri = URI(@api_url + uri)
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = true
         request = build_request method, uri, payload
